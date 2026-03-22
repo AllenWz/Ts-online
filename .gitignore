@@ -56,3 +56,6 @@ buildNumber.properties
 # OS specific files
 Thumbs.db
 .DS_Store
+
+#important security secrets
+src/main/resources/application.properties
