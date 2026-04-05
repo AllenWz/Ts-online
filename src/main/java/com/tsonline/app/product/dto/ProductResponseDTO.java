@@ -14,7 +14,9 @@ public class ProductResponseDTO {
 	
 	private String description;
 
-	private String image;
+	private String imageName;
+	
+	private String imageUrl;
 
 	private double price;
 

@@ -25,7 +25,7 @@ public class Mapper {
 		Product product = new Product();
 		product.setProductName(dto.getProductName());
 		product.setDescription(dto.getDescription());
-		product.setImage(dto.getImage());
+		product.setImage(dto.getImageName());
 		product.setQuantity(dto.getQuantity());
 		product.setPrice(dto.getPrice());
 		product.setDiscount(dto.getDiscount());
@@ -37,7 +37,7 @@ public class Mapper {
 		dto.setProductId(entity.getProductId());
 		dto.setProductName(entity.getProductName());
 		dto.setDescription(entity.getDescription());
-		dto.setImage(entity.getImage());
+		dto.setImageName(entity.getImage());
 		dto.setPrice(entity.getPrice());
 		dto.setDiscount(entity.getDiscount());
 		dto.setSpecialPrice(entity.getSpecialPrice());
