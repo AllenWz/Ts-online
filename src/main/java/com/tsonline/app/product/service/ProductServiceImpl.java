@@ -14,7 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.tsonline.app.category.entity.Category;
 import com.tsonline.app.category.repository.CategoryRespository;
 import com.tsonline.app.common.exception.ResourceNotFoundException;
-import com.tsonline.app.common.util.FileUtil;
+import com.tsonline.app.common.util.FileService;
 import com.tsonline.app.common.util.Mapper;
 import com.tsonline.app.product.dto.ProductListResponse;
 import com.tsonline.app.product.dto.ProductRequestDTO;
@@ -28,13 +28,13 @@ public class ProductServiceImpl implements ProductService {
 	ProductRepository productRepo;
 	CategoryRespository categoryRepo;
 	Mapper mapper;
-	FileUtil fileUtil;
+	FileService fileService;
 
-	public ProductServiceImpl(ProductRepository productRepo, CategoryRespository categoryRepo, Mapper mapper, FileUtil fileUtil) {
+	public ProductServiceImpl(ProductRepository productRepo, CategoryRespository categoryRepo, Mapper mapper, FileService fileUtil) {
 		this.productRepo = productRepo;
 		this.categoryRepo = categoryRepo;
 		this.mapper = mapper;
-		this.fileUtil = fileUtil;
+		this.fileService = fileUtil;
 	}
 
 	@Override
@@ -44,11 +44,11 @@ public class ProductServiceImpl implements ProductService {
 		
 		String fileName = null;
 		try {
-			fileName = fileUtil.uploadFileName(image);
+			fileName = fileService.uploadFileName(image);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		product.setImage(fileName);
+		product.setImageName(fileName);
 		
 		Product productEntity = mapper.productDtoToEntity(product);
 		productEntity.setSpecialPrice(calculateDiscount(product));
@@ -70,7 +70,13 @@ public class ProductServiceImpl implements ProductService {
 		Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
 		Page<Product> productPage = productRepo.findAll(pageable);
 		List<ProductResponseDTO> list = productPage.stream()
-				.map((product) -> mapper.productEntityToDto(product)).toList();
+				.map((product) -> {
+					ProductResponseDTO dto = mapper.productEntityToDto(product);
+					// Presign url setting
+					String url = fileService.getPresignedUrl(dto.getImageName());
+					dto.setImageUrl(url);
+					return dto;
+				}).toList();
 
 		ProductListResponse response = new ProductListResponse();
 		response.setContent(list);
@@ -94,12 +100,17 @@ public class ProductServiceImpl implements ProductService {
 		Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
 		
 		Page<Product> productPage = productRepo.findByCategory(category, pageable);
-		List<ProductResponseDTO> list = productPage.stream()
-				.map(product -> mapper.productEntityToDto(product))
-				.toList();
+		List<ProductResponseDTO> productList = productPage.stream()
+				.map(product -> {
+					ProductResponseDTO dto = mapper.productEntityToDto(product);
+					// Presign url setting
+					String url = fileService.getPresignedUrl(dto.getImageName());
+					dto.setImageUrl(url);
+					return dto;
+				}).toList();
 		
 		ProductListResponse response = new ProductListResponse();
-		response.setContent(list);
+		response.setContent(productList);
 		response.setPageNumber(productPage.getNumber());
 		response.setPageSize(productPage.getSize());
 		response.setTotalElements(productPage.getTotalElements());
@@ -118,12 +129,17 @@ public class ProductServiceImpl implements ProductService {
 		Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
 		
 		Page<Product> productPage = productRepo.findByProductNameLikeIgnoreCase("%" + keyword + "%", pageable);
-		List<ProductResponseDTO> list = productPage.stream()
-				.map(product -> mapper.productEntityToDto(product))
-				.toList();
+		List<ProductResponseDTO> productList = productPage.stream()
+				.map(product -> {
+					ProductResponseDTO dto = mapper.productEntityToDto(product);
+					// Presign url setting
+					String url = fileService.getPresignedUrl(dto.getImageName());
+					dto.setImageUrl(url);
+					return dto;
+				}).toList();
 		
 		ProductListResponse response = new ProductListResponse();
-		response.setContent(list);
+		response.setContent(productList);
 		response.setPageNumber(productPage.getNumber());
 		response.setPageSize(productPage.getSize());
 		response.setTotalElements(productPage.getTotalElements());
@@ -143,13 +159,13 @@ public class ProductServiceImpl implements ProductService {
 		if (image != null && !image.isEmpty()) {
 			String fileName = null;
 			try {
-				fileName = fileUtil.uploadFileName(image);
+				fileName = fileService.uploadFileName(image);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 			product.setImage(fileName);
 		} else {
-			product.setImage(dto.getImage());
+			product.setImage(dto.getImageName());
 		}
 		
 		product.setProductName(dto.getProductName());

@@ -4,6 +4,10 @@ import java.io.IOException;
 
 import org.springframework.web.multipart.MultipartFile;
 
-public interface FileUtil {
+public interface FileService {
 	String uploadFileName(MultipartFile file) throws IOException;
+	
+	String getPresignedUrl(String fileName);
+	
+	void deleteFile(String fileName);
 }

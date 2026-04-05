@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
-public class LocalFileServiceImpl implements FileUtil{
+public class LocalFileServiceImpl implements FileService{
 	
 	@Value("${project.image}")
 	private String path;
@@ -32,6 +32,18 @@ public class LocalFileServiceImpl implements FileUtil{
 		}
 		Files.copy(file.getInputStream(), Paths.get(filePath));
 		return fileName;
+	}
+
+	@Override
+	public String getPresignedUrl(String fileName) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void deleteFile(String fileName) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

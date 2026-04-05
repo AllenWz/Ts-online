@@ -1,8 +1,8 @@
 package com.tsonline.app.product.entity;
 
-import java.time.LocalDateTime;
-
 import com.tsonline.app.category.entity.Category;
+import com.tsonline.app.common.entity.BaseEntity;
+import com.tsonline.app.user.entity.User;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -10,15 +10,19 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
-@Data
+@Setter
+@Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Product {
+@Table(name = "products")
+public class Product extends BaseEntity{
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long productId;
@@ -37,15 +41,11 @@ public class Product {
 
 	private double specialPrice;
 
-	private String createdBy;
-
-	private LocalDateTime createdAt;
-
-	private String updatedBy;
-
-	private LocalDateTime updatedAt;
-
 	@ManyToOne
-	@JoinColumn(name = "categoryId")
+	@JoinColumn(name = "category_id")
 	private Category category;
+	
+	@ManyToOne
+	@JoinColumn(name = "seller_id")
+	private User user;
 }
