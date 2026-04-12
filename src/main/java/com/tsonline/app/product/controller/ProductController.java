@@ -2,6 +2,7 @@ package com.tsonline.app.product.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,14 +30,7 @@ public class ProductController {
 	public ProductController(ProductService productService) {
 		this.productService = productService;
 	}
-
-	@PostMapping("/admin/product")
-	public ResponseEntity<ProductResponseDTO> addProduct(@RequestPart ProductRequestDTO product,
-															@RequestParam MultipartFile image) {
-		ProductResponseDTO body = productService.addProduct(product, image);
-		return new ResponseEntity<>(body, HttpStatus.CREATED);
-	}
-
+	
 	@GetMapping("public/products")
 	public ResponseEntity<ProductListResponse> getAllProducts(
 			@RequestParam(defaultValue = AppConstants.PAGE_NUMBER, required = false) Integer pageNumber,
@@ -68,8 +62,17 @@ public class ProductController {
 		ProductListResponse response = productService.findProductByKeyword(pageNumber,pageSize,sortOrder,sortBy,keyword);
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
+
+	@PreAuthorize("hasAnyRole('ROLE_SELLER', 'ROLE_ADMIN')")
+	@PostMapping("/product")
+	public ResponseEntity<ProductResponseDTO> addProduct(@RequestPart ProductRequestDTO product,
+															@RequestParam MultipartFile image) {
+		ProductResponseDTO body = productService.addProduct(product, image);
+		return new ResponseEntity<>(body, HttpStatus.CREATED);
+	}
 	
-	@PutMapping("admin/product/{productId}")
+	@PreAuthorize("hasAnyRole('ROLE_SELLER', 'ROLE_ADMIN')")
+	@PutMapping("/product/{productId}")
 	public ResponseEntity<ProductResponseDTO> updateProduct(@PathVariable Long productId, 
 															@RequestPart ProductRequestDTO dto,
 															@RequestParam MultipartFile image) {
@@ -77,7 +80,8 @@ public class ProductController {
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 	
-	@DeleteMapping("admin/product/{productId}")
+	@PreAuthorize("hasAnyRole('ROLE_SELLER', 'ROLE_ADMIN')")
+	@DeleteMapping("/product/{productId}")
 	public ResponseEntity<String> deleteProduct(@PathVariable Long productId) {
 		productService.deleteProduct(productId);
 		return new ResponseEntity<>("Product Deleted", HttpStatus.OK);

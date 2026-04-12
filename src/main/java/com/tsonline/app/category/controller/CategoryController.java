@@ -2,6 +2,7 @@ package com.tsonline.app.category.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.tsonline.app.category.dto.CategoryDtoRequest;
@@ -13,7 +14,7 @@ import com.tsonline.app.config.AppConstants;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/api/public/categories")
+@RequestMapping("/api")
 public class CategoryController {
 
 	private final CategoryService service;
@@ -36,7 +37,7 @@ public class CategoryController {
 	 * @return a {@link ResponseEntity} containing the {@link CategoryListResponse}
 	 *         and HTTP status 200 (OK)
 	 */
-	@GetMapping
+	@GetMapping("/public/categories")
 	public ResponseEntity<CategoryListResponse> getAllCategories(
 			@RequestParam(defaultValue = AppConstants.PAGE_NUMBER, required = false) Integer pageNumber,
 			@RequestParam(defaultValue = AppConstants.PAGE_SIZE, required = false) Integer pageSize,
@@ -53,7 +54,8 @@ public class CategoryController {
 	 * @return a {@link ResponseEntity} containing the created
 	 *         {@link CategoryDtoResponse} and HTTP status 201 (Created)
 	 */
-	@PostMapping
+	@PreAuthorize("hasAnyRole('ROLE_SELLER', 'ROLE_ADMIN')")
+	@PostMapping("/categories")
 	public ResponseEntity<CategoryDtoResponse> registerCategory(@Valid @RequestBody CategoryDtoRequest category) {
 		CategoryDtoResponse body = service.registerCategory(category);
 		return new ResponseEntity<>(body, HttpStatus.CREATED);
@@ -67,7 +69,8 @@ public class CategoryController {
 	 * @return a {@link ResponseEntity} containing the updated
 	 *         {@link CategoryDtoResponse} and HTTP status 200 (OK)
 	 */
-	@PutMapping("/{id}")
+	@PreAuthorize("hasAnyRole('ROLE_SELLER', 'ROLE_ADMIN')")
+	@PutMapping("/categories/{id}")
 	public ResponseEntity<CategoryDtoResponse> updateCategory(@PathVariable Long id,
 			@RequestBody CategoryDtoRequest category) {
 		CategoryDtoResponse body = service.updateCategory(id, category);
@@ -81,7 +84,8 @@ public class CategoryController {
 	 * @return a {@link ResponseEntity} containing a success message string and HTTP
 	 *         status 200 (OK)
 	 */
-	@DeleteMapping("/{id}")
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
+	@DeleteMapping("/categories/{id}")
 	public ResponseEntity<String> deleteCategory(@PathVariable Long id) {
 		String body = service.deleteCategory(id);
 		return new ResponseEntity<>(body, HttpStatus.OK);
