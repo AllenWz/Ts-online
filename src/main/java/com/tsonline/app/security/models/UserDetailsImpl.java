@@ -1,4 +1,4 @@
-package com.tsonline.app.security.services;
+package com.tsonline.app.security.models;
 
 import java.util.Collection;
 import java.util.List;

@@ -2,6 +2,8 @@ package com.tsonline.app.common.util;
 
 import org.springframework.stereotype.Component;
 
+import com.tsonline.app.cart.dto.CartResponseDto;
+import com.tsonline.app.cart.entity.Cart;
 import com.tsonline.app.category.dto.CategoryDtoRequest;
 import com.tsonline.app.category.dto.CategoryDtoResponse;
 import com.tsonline.app.category.entity.Category;
@@ -38,10 +40,19 @@ public class Mapper {
 		dto.setProductName(entity.getProductName());
 		dto.setDescription(entity.getDescription());
 		dto.setImageName(entity.getImage());
+		dto.setQuantity(entity.getQuantity());
 		dto.setPrice(entity.getPrice());
 		dto.setDiscount(entity.getDiscount());
 		dto.setSpecialPrice(entity.getSpecialPrice());
-		dto.setCategoryId(entity.getCategory().getCategoryId());	
+		dto.setCategoryId(entity.getCategory().getCategoryId());
+		dto.setDeleted(entity.isDeleted());
+		return dto;
+	}
+	
+	public CartResponseDto cartEntityToDto(Cart cart) {
+		CartResponseDto dto = new CartResponseDto();
+		dto.setCartId(cart.getCartId());
+		dto.setTotalPrice(cart.getTotalPrice());
 		return dto;
 	}
 }

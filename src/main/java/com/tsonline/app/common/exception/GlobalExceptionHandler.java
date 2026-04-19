@@ -1,6 +1,8 @@
 package com.tsonline.app.common.exception;
 
+import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
@@ -22,25 +24,27 @@ public class GlobalExceptionHandler {
 	private final MessageSource messageSource;
 
 	@ExceptionHandler(MethodArgumentNotValidException.class)
-	public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
-		ErrorResponse errorResponse = new ErrorResponse();
-		ex.getBindingResult().getAllErrors().forEach(error -> {
-
-			String defaultFieldName = ((FieldError) error).getField();
-			String customFieldName = messageSource.getMessage("field." + defaultFieldName, null, defaultFieldName,
-					Locale.getDefault());
-
-			String rawMessage = error.getDefaultMessage();
-			String finalMessage = rawMessage.replace("{0}", customFieldName);
-			if (error.getArguments() != null && error.getArguments().length > 1) {
-				finalMessage = finalMessage.replace("{1}", error.getArguments()[2].toString()).replace("{2}",
-						error.getArguments()[1].toString());
-			}
-
-			errorResponse.setField(customFieldName);
-			errorResponse.setErrorMessage(finalMessage);
-		});
-		return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+	public ResponseEntity<List<ErrorResponse>> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
+		List<ErrorResponse> errors = ex.getBindingResult().getFieldErrors().stream()
+				.map(error -> {
+					// Getting the field name and customize it
+					String defaultFieldName = error.getField();
+					String customFieldName = messageSource.getMessage("field. " + defaultFieldName ,
+																		null, defaultFieldName, Locale.getDefault());
+					// Setting the custom message according to param values
+					String rawMessage = error.getDefaultMessage();
+					String finalMessage = (rawMessage != null) ? rawMessage.replace("{0}", customFieldName) : "";
+					if (error.getArguments() != null && error.getArguments().length > 1) {
+						finalMessage = finalMessage.replace("{1}", error.getArguments()[2].toString()).replace("{2}",
+								error.getArguments()[1].toString());
+					}
+					ErrorResponse err = new ErrorResponse();
+		            err.setField(customFieldName);
+		            err.setErrorMessage(finalMessage);
+		            return err;
+				}).collect(Collectors.toList());
+		
+		return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
 	}
 
 	@ExceptionHandler(ResourceNotFoundException.class)
@@ -57,6 +61,15 @@ public class GlobalExceptionHandler {
 		ErrorResponse errorResponse = new ErrorResponse();
 		errorResponse.setErrorMessage(message);
 		return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
+	}
+
+	@ExceptionHandler(BusinessRuleException.class)
+	public ResponseEntity<ErrorResponse> handleBusinessRuleException(BusinessRuleException ex) {
+		String message = ex.getMessage();
+		HttpStatus status = ex.getStatus();
+		ErrorResponse errorResponse = new ErrorResponse();
+		errorResponse.setErrorMessage(message);
+		return new ResponseEntity<>(errorResponse, status);
 	}
 
 	@ExceptionHandler(HttpRequestMethodNotSupportedException.class)

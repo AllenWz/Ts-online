@@ -8,8 +8,11 @@ import javax.crypto.SecretKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseCookie;
+import org.springframework.http.ResponseCookie.ResponseCookieBuilder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.WebUtils;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -17,6 +20,7 @@ import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 
 @Component
@@ -29,21 +33,41 @@ public class JwtUtils {
 	@Value("${spring.app.jwtExpirationMs}")
 	private int jwtExpirationMs;
 	
+	@Value("${spring.app.jwtCookieName}")
+	private String jwtCookie;
+	
 	// Key generation
 	public Key key() {
 		return Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
 	}
 	
 	// Token generation
-	public String generateTokenFromUsername(UserDetails userDetails) {
-		String username = userDetails.getUsername();
-		
+	public String generateTokenFromUsername(String username) {		
 		return Jwts.builder()
 				.subject(username)
 				.issuedAt(new Date())
 				.expiration(new Date(new Date().getTime() + jwtExpirationMs))
 				.signWith(key())
 				.compact();
+	}
+	
+	// Cookie generation
+	public ResponseCookie generateJwtCookie(UserDetails userDetails) {
+		String jwt = generateTokenFromUsername(userDetails.getUsername());
+		ResponseCookie cookie = ResponseCookie.from(jwtCookie, jwt)
+											.path("/api")
+											.maxAge(24 * 60 * 60)
+											.httpOnly(false)
+											.build();
+		return cookie;
+	}
+	
+	// Cookie removal
+	public ResponseCookie cleanJwtCookie() {
+		ResponseCookie cookie = ResponseCookie.from(jwtCookie, null)
+											.path("/api")
+											.build();
+		return cookie;
 	}
 	
 	// Getting JWT token from header
@@ -56,6 +80,16 @@ public class JwtUtils {
 		}
 		
 		return null;
+	}
+	
+	// Getting JWT token from cookie
+	public String getJwtFromCookies(HttpServletRequest request) {
+		Cookie cookie = WebUtils.getCookie(request, jwtCookie);
+		if(cookie != null) {
+			return cookie.getValue();
+		} else {
+			return null;
+		}
 	}
 	
 	// Token validation

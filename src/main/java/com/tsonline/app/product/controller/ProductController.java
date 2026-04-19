@@ -21,6 +21,8 @@ import com.tsonline.app.product.dto.ProductRequestDTO;
 import com.tsonline.app.product.dto.ProductResponseDTO;
 import com.tsonline.app.product.service.ProductService;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/api")
 public class ProductController {
@@ -65,7 +67,7 @@ public class ProductController {
 
 	@PreAuthorize("hasAnyRole('ROLE_SELLER', 'ROLE_ADMIN')")
 	@PostMapping("/product")
-	public ResponseEntity<ProductResponseDTO> addProduct(@RequestPart ProductRequestDTO product,
+	public ResponseEntity<ProductResponseDTO> addProduct(@Valid @RequestPart ProductRequestDTO product,
 															@RequestParam MultipartFile image) {
 		ProductResponseDTO body = productService.addProduct(product, image);
 		return new ResponseEntity<>(body, HttpStatus.CREATED);
@@ -73,8 +75,8 @@ public class ProductController {
 	
 	@PreAuthorize("hasAnyRole('ROLE_SELLER', 'ROLE_ADMIN')")
 	@PutMapping("/product/{productId}")
-	public ResponseEntity<ProductResponseDTO> updateProduct(@PathVariable Long productId, 
-															@RequestPart ProductRequestDTO dto,
+	public ResponseEntity<ProductResponseDTO> updateProduct(@Valid @RequestPart ProductRequestDTO dto, 
+															@PathVariable Long productId,
 															@RequestParam MultipartFile image) {
 		ProductResponseDTO response = productService.updateProduct(productId, dto, image);
 		return new ResponseEntity<>(response, HttpStatus.OK);

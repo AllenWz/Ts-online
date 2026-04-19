@@ -71,8 +71,8 @@ public class CategoryController {
 	 */
 	@PreAuthorize("hasAnyRole('ROLE_SELLER', 'ROLE_ADMIN')")
 	@PutMapping("/categories/{id}")
-	public ResponseEntity<CategoryDtoResponse> updateCategory(@PathVariable Long id,
-			@RequestBody CategoryDtoRequest category) {
+	public ResponseEntity<CategoryDtoResponse> updateCategory(@Valid @RequestBody CategoryDtoRequest category,
+			@PathVariable Long id) {
 		CategoryDtoResponse body = service.updateCategory(id, category);
 		return new ResponseEntity<>(body, HttpStatus.OK);
 	}

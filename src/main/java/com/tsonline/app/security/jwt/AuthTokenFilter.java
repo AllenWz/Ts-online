@@ -37,7 +37,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 
 		try {
 			// 1) take jwt token from header
-			String jwt = jwtUtils.getJwtFromHeader(request);
+			String jwt = jwtUtils.getJwtFromCookies(request);
 			// 2) validate token
 			if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
 				// 3) take username from token

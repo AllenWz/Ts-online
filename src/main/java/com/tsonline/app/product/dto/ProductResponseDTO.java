@@ -17,6 +17,8 @@ public class ProductResponseDTO {
 	private String imageName;
 	
 	private String imageUrl;
+	
+	private Integer quantity;
 
 	private double price;
 
@@ -25,4 +27,6 @@ public class ProductResponseDTO {
 	private double specialPrice;
 	
 	private Long categoryId;
+	
+	private boolean deleted = false;
 }
