@@ -3,6 +3,7 @@ package com.tsonline.app.cart.entity;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.tsonline.app.common.entity.BaseEntity;
 import com.tsonline.app.user.entity.User;
 
 import jakarta.persistence.CascadeType;
@@ -25,7 +26,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Cart {
+public class Cart extends BaseEntity{
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long cartId;

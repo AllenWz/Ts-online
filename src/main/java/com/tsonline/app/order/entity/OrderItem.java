@@ -1,4 +1,4 @@
-package com.tsonline.app.cart.entity;
+package com.tsonline.app.order.entity;
 
 import com.tsonline.app.common.entity.BaseEntity;
 import com.tsonline.app.product.entity.Product;
@@ -16,27 +16,27 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Getter
 @Setter
-@AllArgsConstructor
+@Getter
 @NoArgsConstructor
-@Table(name = "cart_items")
-public class CartItem extends BaseEntity{
+@AllArgsConstructor
+@Table(name = "order_items")
+public class OrderItem extends BaseEntity{
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long cartItemId;
-	
-	@ManyToOne
-	@JoinColumn(name = "cart_Id")
-	private Cart cart;
+	private Long orderItemId;
 	
 	@ManyToOne
 	@JoinColumn(name = "product_id")
 	private Product product;
 	
+	@ManyToOne
+	@JoinColumn(name = "order_id")
+	private Order order;
+	
 	private Integer quantity;
 	
 	private Double discount;
 	
-	private Double productPrice;
+	private Double orderedProductPrice;
 }

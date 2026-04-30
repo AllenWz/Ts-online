@@ -1,7 +1,7 @@
-package com.tsonline.app.cart.entity;
+package com.tsonline.app.address.entity;
 
 import com.tsonline.app.common.entity.BaseEntity;
-import com.tsonline.app.product.entity.Product;
+import com.tsonline.app.user.entity.User;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -18,25 +18,28 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "cart_items")
-public class CartItem extends BaseEntity{
+@AllArgsConstructor
+@Table(name = "addresses")
+public class Address extends BaseEntity{	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long cartItemId;
+	private Long addressId;
+	
+	private String street;
+	
+	private String buildingName;
+	
+	private String city;
+	
+	private String state;
+	
+	private String country;
+	
+	private String pincode;
 	
 	@ManyToOne
-	@JoinColumn(name = "cart_Id")
-	private Cart cart;
+	@JoinColumn(name = "user_id")
+	private User user;
 	
-	@ManyToOne
-	@JoinColumn(name = "product_id")
-	private Product product;
-	
-	private Integer quantity;
-	
-	private Double discount;
-	
-	private Double productPrice;
 }

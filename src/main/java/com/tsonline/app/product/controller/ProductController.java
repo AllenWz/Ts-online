@@ -1,5 +1,7 @@
 package com.tsonline.app.product.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.tsonline.app.cart.service.CartServiceImpl;
 import com.tsonline.app.config.AppConstants;
 import com.tsonline.app.product.dto.ProductListResponse;
 import com.tsonline.app.product.dto.ProductRequestDTO;
@@ -26,6 +29,7 @@ import jakarta.validation.Valid;
 @RestController
 @RequestMapping("/api")
 public class ProductController {
+	private static final Logger logger = LoggerFactory.getLogger(CartServiceImpl.class);
 
 	ProductService productService;
 
@@ -39,6 +43,8 @@ public class ProductController {
 			@RequestParam(defaultValue = AppConstants.PAGE_SIZE, required = false) Integer pageSize,
 			@RequestParam(defaultValue = AppConstants.SORT_ORDER, required = false) String sortOrder,
 			@RequestParam(defaultValue = AppConstants.SORT_PRODUCT_BY, required = false) String sortBy) {
+		
+		logger.info("#ProductController#getAllProducts");
 		ProductListResponse response = productService.getAllProducts(pageNumber,pageSize,sortOrder,sortBy);
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
@@ -50,6 +56,8 @@ public class ProductController {
 			@RequestParam(defaultValue = AppConstants.PAGE_SIZE, required = false) Integer pageSize,
 			@RequestParam(defaultValue = AppConstants.SORT_ORDER, required = false) String sortOrder,
 			@RequestParam(defaultValue = AppConstants.SORT_PRODUCT_BY, required = false) String sortBy) {
+		
+		logger.info("#ProductController#getProductsByCategory");
 		ProductListResponse response = productService.findByCategory(pageNumber,pageSize,sortOrder,sortBy,categoryId);
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
@@ -61,6 +69,8 @@ public class ProductController {
 			@RequestParam(defaultValue = AppConstants.PAGE_SIZE, required = false) Integer pageSize,
 			@RequestParam(defaultValue = AppConstants.SORT_ORDER, required = false) String sortOrder,
 			@RequestParam(defaultValue = AppConstants.SORT_PRODUCT_BY, required = false) String sortBy) {
+		
+		logger.info("#ProductController#findProductByKeyword");
 		ProductListResponse response = productService.findProductByKeyword(pageNumber,pageSize,sortOrder,sortBy,keyword);
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
@@ -69,6 +79,8 @@ public class ProductController {
 	@PostMapping("/product")
 	public ResponseEntity<ProductResponseDTO> addProduct(@Valid @RequestPart ProductRequestDTO product,
 															@RequestParam MultipartFile image) {
+		
+		logger.info("#ProductController#addProduct");
 		ProductResponseDTO body = productService.addProduct(product, image);
 		return new ResponseEntity<>(body, HttpStatus.CREATED);
 	}
@@ -78,6 +90,8 @@ public class ProductController {
 	public ResponseEntity<ProductResponseDTO> updateProduct(@Valid @RequestPart ProductRequestDTO dto, 
 															@PathVariable Long productId,
 															@RequestParam MultipartFile image) {
+		
+		logger.info("#ProductController#updateProduct");
 		ProductResponseDTO response = productService.updateProduct(productId, dto, image);
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
@@ -85,6 +99,8 @@ public class ProductController {
 	@PreAuthorize("hasAnyRole('ROLE_SELLER', 'ROLE_ADMIN')")
 	@DeleteMapping("/product/{productId}")
 	public ResponseEntity<String> deleteProduct(@PathVariable Long productId) {
+		
+		logger.info("#ProductController#deleteProduct");
 		productService.deleteProduct(productId);
 		return new ResponseEntity<>("Product Deleted", HttpStatus.OK);
 	}

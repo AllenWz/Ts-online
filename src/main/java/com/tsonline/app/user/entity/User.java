@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.tsonline.app.address.entity.Address;
 import com.tsonline.app.cart.entity.Cart;
 import com.tsonline.app.common.entity.BaseEntity;
 import com.tsonline.app.product.entity.Product;
@@ -67,11 +68,9 @@ public class User extends BaseEntity{
 				orphanRemoval = true)
 	private Set<Product> products;
 	
-	@ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, 
-			fetch = FetchType.EAGER)
-	@JoinTable(name = "user_address",
-				joinColumns = @JoinColumn(name = "user_id"),
-				inverseJoinColumns = @JoinColumn(name = "address_id"))
+	@OneToMany(mappedBy = "user", 
+				cascade = {CascadeType.PERSIST, CascadeType.MERGE}, 
+				orphanRemoval = true)
 	private List<Address> addresses = new ArrayList<>();
 	
 	@ToString.Exclude
