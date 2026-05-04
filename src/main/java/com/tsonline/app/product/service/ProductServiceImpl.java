@@ -13,11 +13,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.tsonline.app.cart.dto.CartResponseDto;
 import com.tsonline.app.cart.entity.Cart;
 import com.tsonline.app.cart.repository.CartRepository;
 import com.tsonline.app.cart.service.CartService;
-import com.tsonline.app.cart.service.CartServiceImpl;
 import com.tsonline.app.category.entity.Category;
 import com.tsonline.app.category.repository.CategoryRespository;
 import com.tsonline.app.common.exception.ResourceNotFoundException;
@@ -33,7 +31,7 @@ import jakarta.transaction.Transactional;
 
 @Service
 public class ProductServiceImpl implements ProductService {
-	private static final Logger logger = LoggerFactory.getLogger(CartServiceImpl.class);
+	private static final Logger logger = LoggerFactory.getLogger(ProductServiceImpl.class);
 	
 	Mapper mapper;
 	
@@ -67,14 +65,13 @@ public class ProductServiceImpl implements ProductService {
 		try {
 			fileName = fileService.uploadFileName(image);
 		} catch (IOException e) {
+			logger.error(e.getMessage());
 			e.printStackTrace();
 		}
 		product.setImageName(fileName);
 		
 		Product productEntity = mapper.productDtoToEntity(product);
 		productEntity.setSpecialPrice(calculateDiscount(product));
-		productEntity.setCreatedBy("admin");
-		productEntity.setCreatedAt(LocalDateTime.now());
 		productEntity.setCategory(category);
 
 		Product savedProduct = productRepo.save(productEntity);
@@ -185,7 +182,9 @@ public class ProductServiceImpl implements ProductService {
 			String fileName = null;
 			try {
 				fileName = fileService.uploadFileName(image);
+				fileService.deleteFile(product.getImage());
 			} catch (IOException e) {
+				logger.error(e.getMessage());
 				e.printStackTrace();
 			}
 			product.setImage(fileName);
@@ -199,8 +198,6 @@ public class ProductServiceImpl implements ProductService {
 		product.setDiscount(dto.getDiscount());
 		product.setSpecialPrice(calculateDiscount(dto));
 		product.setCategory(category);
-		product.setUpdatedAt(LocalDateTime.now());
-		product.setUpdatedBy("admin");
 		
 		Product savedProduct = productRepo.save(product);
 		
@@ -211,13 +208,14 @@ public class ProductServiceImpl implements ProductService {
 		return response;
 	}
 	
+	@Transactional
 	@Override
 	public void deleteProduct(Long productId) {
 		logger.info("#ProductServiceImpl#deleteProduct");
 		Product product = productRepo.findById(productId)
 								.orElseThrow(() -> new ResourceNotFoundException());
 		product.setDeleted(true);	
-		productRepo.save(product);	
+		productRepo.save(product);
 	}
 
 	private Double calculateDiscount(ProductRequestDTO dto) {

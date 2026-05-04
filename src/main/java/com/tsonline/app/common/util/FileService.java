@@ -9,5 +9,5 @@ public interface FileService {
 	
 	String getPresignedUrl(String fileName);
 	
-	void deleteFile(String fileName);
+	void deleteFile(String fileName) throws IOException;
 }

@@ -3,6 +3,8 @@ package com.tsonline.app.category.service;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -20,6 +22,7 @@ import com.tsonline.app.common.util.Mapper;
 
 @Service
 public class CategoryServiceImpl implements CategoryService {
+	private static final Logger logger = LoggerFactory.getLogger(CategoryServiceImpl.class);
 
 	CategoryRespository repo;
 	Mapper mapper;
@@ -29,18 +32,11 @@ public class CategoryServiceImpl implements CategoryService {
 		this.mapper = mapper;
 	}
 
-	/**
-	 * Retrieves a paginated list of categories converted to DTOs. * @param
-	 * pageNumber the zero-based page index
-	 * 
-	 * @param pageSize  the size of the page to be returned
-	 * @param sortBy    the field by which to sort the results
-	 * @param sortOrder the direction of the sort ("asc" or "desc")
-	 * @return a {@link CategoryListResponse} containing paginated data and metadata
-	 */
+
 	@Override
-	public CategoryListResponse getAllCategories(Integer pageNumber, Integer pageSize, String sortBy,
-			String sortOrder) {
+	public CategoryListResponse getAllCategories(Integer pageNumber, Integer pageSize, 
+												String sortBy, String sortOrder) {
+		logger.info("#CategoryServiceImpl#getAllCategories");
 		Sort sort = sortOrder.equalsIgnoreCase("asc") 
 						? Sort.by(sortBy).ascending() 
 						: Sort.by(sortBy).descending();
@@ -62,17 +58,10 @@ public class CategoryServiceImpl implements CategoryService {
 		return categoryResponse;
 	}
 
-	/**
-	 * Creates a new category. Checks for duplicates and assigns audit information
-	 * (creator and timestamp). * @param categoryToRegister the DTO containing the
-	 * category name
-	 * 
-	 * @return the saved {@link CategoryDtoResponse}
-	 * @throws DuplicateEntryException if a category with the same name already
-	 *                                 exists
-	 */
+	
 	@Override
 	public CategoryDtoResponse registerCategory(CategoryDtoRequest categoryToRegister) {
+		logger.info("#CategoryServiceImpl#registerCategory");
 		Category foundCategory = repo.findByCategoryName(categoryToRegister.getCategoryName());
 
 		if (foundCategory != null)
@@ -87,16 +76,10 @@ public class CategoryServiceImpl implements CategoryService {
 		return mapper.categoryEntityToDto(savedCategory);
 	}
 
-	/**
-	 * Updates an existing category's name and audit metadata. * @param idToUpdate
-	 * the ID of the category to modify
-	 * 
-	 * @param categoryToUpdate the DTO containing the new category details
-	 * @return the updated {@link CategoryDtoResponse}
-	 * @throws ResourceNotFoundException if the category ID does not exist
-	 */
+	
 	@Override
 	public CategoryDtoResponse updateCategory(Long idToUpdate, CategoryDtoRequest categoryToUpdate) {
+		logger.info("#CategoryServiceImpl#updateCategory");
 		Category foundCategory = repo.findById(idToUpdate)
 				.orElseThrow(() -> new ResourceNotFoundException("Category", "categoryId", idToUpdate));
 
@@ -108,21 +91,13 @@ public class CategoryServiceImpl implements CategoryService {
 		return mapper.categoryEntityToDto(savedCategory);
 	}
 
-	/**
-	 * Deletes a category by its unique identifier. * @param idToDelete the ID of
-	 * the category to be removed
-	 * 
-	 * @return a success message or a "not found" message
-	 */
+	
 	@Override
-	public String deleteCategory(Long idToDelete) {
-		Category foundCategory = repo.findById(idToDelete).orElse(null);
-
-		if (foundCategory != null) {
-			repo.deleteById(idToDelete);
-			return "Category with id " + idToDelete + " deleted successfully!";
-		}
-
-		return "not found id " + idToDelete;
+	public void deleteCategory(Long idToDelete) {
+		logger.info("#CategoryServiceImpl#deleteCategory");
+		Category foundCategory = repo.findById(idToDelete)
+										.orElseThrow(() -> new ResourceNotFoundException("Category", "categoryId", idToDelete));
+		foundCategory.setDeleted(true);
+		repo.save(foundCategory);
 	}
 }

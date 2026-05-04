@@ -22,7 +22,7 @@ public class ProductRequestDTO {
 	@Size(max = 255, message = "{common.size.max}")
 	private String description;
 	
-	@Max(value = 50, message = "{common.size.max}")
+	@Size(max = 50, message = "{common.size.max}")
 	private String imageName;
 	
 	@NotNull(message = "{common.required}")

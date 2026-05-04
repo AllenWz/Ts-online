@@ -36,8 +36,8 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 		logger.debug("AuthTokenFilter called for URI: {}", request.getRequestURI());
 
 		try {
-			// 1) take jwt token from header
-			String jwt = jwtUtils.getJwtFromCookies(request);
+			// 1) take jwt token from cookie/header
+			String jwt = parseJwt(request);
 			// 2) validate token
 			if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
 				// 3) take username from token
@@ -59,4 +59,27 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 		filterChain.doFilter(request, response);
 	}
 
+	public String getJwtFromHeader(HttpServletRequest request) {
+		logger.info("#AuthTokenFilter#getJwtFromHeader");
+		String bearerToken = request.getHeader("Authorization");
+		if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+			return bearerToken.substring(7);
+		}
+		return null;
+	}
+	
+	private String parseJwt(HttpServletRequest request) {
+		logger.info("#AuthTokenFilter#parseJwt");
+		String jwtFromCookies = jwtUtils.getJwtFromCookies(request);
+		if(jwtFromCookies != null) {
+			return jwtFromCookies;
+		}
+		
+		String jwtFromHeader = jwtUtils.getJwtFromHeader(request);
+		if(jwtFromHeader != null) {
+			return jwtFromHeader;
+		}
+		
+		return null;
+	}
 }

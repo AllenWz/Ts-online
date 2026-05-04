@@ -13,7 +13,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import com.tsonline.app.category.dto.ErrorResponse;
+import com.tsonline.app.common.dto.ErrorResponse;
 
 import lombok.RequiredArgsConstructor;
 
@@ -32,12 +32,9 @@ public class GlobalExceptionHandler {
 					String customFieldName = messageSource.getMessage("field. " + defaultFieldName ,
 																		null, defaultFieldName, Locale.getDefault());
 					// Setting the custom message according to param values
-					String rawMessage = error.getDefaultMessage();
-					String finalMessage = (rawMessage != null) ? rawMessage.replace("{0}", customFieldName) : "";
-					if (error.getArguments() != null && error.getArguments().length > 1) {
-						finalMessage = finalMessage.replace("{1}", error.getArguments()[2].toString()).replace("{2}",
-								error.getArguments()[1].toString());
-					}
+					String finalMessage = messageSource.getMessage(error, Locale.getDefault());
+					finalMessage = finalMessage.replace("{0}", customFieldName);
+					
 					ErrorResponse err = new ErrorResponse();
 		            err.setField(customFieldName);
 		            err.setErrorMessage(finalMessage);

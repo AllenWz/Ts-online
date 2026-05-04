@@ -3,6 +3,8 @@ package com.tsonline.app.product.entity;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hibernate.annotations.SQLRestriction;
+
 import com.tsonline.app.cart.entity.CartItem;
 import com.tsonline.app.category.entity.Category;
 import com.tsonline.app.common.entity.BaseEntity;
@@ -29,6 +31,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "products")
+@SQLRestriction("deleted = false")
 public class Product extends BaseEntity{
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

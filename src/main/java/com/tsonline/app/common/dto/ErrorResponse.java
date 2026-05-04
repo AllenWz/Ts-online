@@ -1,4 +1,4 @@
-package com.tsonline.app.category.dto;
+package com.tsonline.app.common.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

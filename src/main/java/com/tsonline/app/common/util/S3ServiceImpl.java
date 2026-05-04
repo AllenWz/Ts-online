@@ -4,10 +4,14 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
+import com.tsonline.app.category.controller.CategoryController;
 
 import lombok.RequiredArgsConstructor;
 import software.amazon.awssdk.core.sync.RequestBody;
@@ -22,14 +26,17 @@ import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignReques
 @Primary
 @RequiredArgsConstructor
 public class S3ServiceImpl implements FileService {
+	private static final Logger logger = LoggerFactory.getLogger(S3ServiceImpl.class);
 
 	private final S3Client s3Client;
+	private final S3Presigner s3Presigner;
 
 	@Value("${aws.s3.bucket-name}")
 	private String bucketName;
 
 	@Override
 	public String uploadFileName(MultipartFile file) throws IOException {
+		logger.info("#S3ServiceImpl#uploadFileName");
 		// Generate unique File Name
 		String originalFileName = file.getOriginalFilename();
 		String randomUUID = UUID.randomUUID().toString();
@@ -54,10 +61,11 @@ public class S3ServiceImpl implements FileService {
 
 	@Override
 	public String getPresignedUrl(String fileName) {
+		logger.info("#S3ServiceImpl#getPresignedUrl");
 		if (fileName == null || fileName.isEmpty()) return null;
 		
 		// Create temporary 15 min link to use at frontend
-		try (S3Presigner presigner = S3Presigner.create()) {
+		try {
 			GetObjectRequest getObjectRequest = GetObjectRequest
 					.builder()
 					.bucket(bucketName)
@@ -70,16 +78,21 @@ public class S3ServiceImpl implements FileService {
 					.getObjectRequest(getObjectRequest)
 					.build();
 			
-			return presigner.presignGetObject(presignRequest).url().toString();
+			return s3Presigner.presignGetObject(presignRequest).url().toString();
+		} catch(Exception ex) {
+			logger.error(ex.getMessage());
+			return null;
 		}
 	}
 
 	@Override
-	public void deleteFile(String fileName) {
+	public void deleteFile(String fileName) throws IOException {
+		logger.info("#S3ServiceImpl#deleteFile");
 		DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
                 .bucket(bucketName)
                 .key(fileName)
                 .build();
-        s3Client.deleteObject(deleteObjectRequest);
+		
+		s3Client.deleteObject(deleteObjectRequest); 
 	}
 }

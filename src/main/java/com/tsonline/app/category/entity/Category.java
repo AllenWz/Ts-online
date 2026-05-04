@@ -1,5 +1,7 @@
 package com.tsonline.app.category.entity;
 
+import org.hibernate.annotations.SQLRestriction;
+
 import com.tsonline.app.common.entity.BaseEntity;
 
 import jakarta.persistence.Column;
@@ -19,6 +21,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "categories")
+@SQLRestriction("deleted = false")
 public class Category extends BaseEntity{
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,4 +29,6 @@ public class Category extends BaseEntity{
 	
 	@Column(unique = true, nullable = false)
 	private String categoryName;
+	
+	private boolean deleted = false;
 }
